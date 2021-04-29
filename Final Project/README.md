@@ -2,7 +2,7 @@
 
 ## Group Member
 
-Xiaohan Sun, Evelyn Chen, Liyuan Zhang
+Xiaohan Sun, Evelyn Cheng, Liyuan Zhang
 
 ## Data
 
