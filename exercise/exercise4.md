@@ -1,6 +1,6 @@
 ## Problem 1: Clustering and PCA
 
-### Run both PCA and a clustering algorithm of your choice on the 11 chemical properties (or suitable transformations thereof) and summarize your results.
+#### Run both PCA and a clustering algorithm of your choice on the 11 chemical properties (or suitable transformations thereof) and summarize your results.
 
 **PCA MODEL**
 
@@ -38,7 +38,7 @@
       scale_x_continuous( breaks=seq(0,1,1))
     PCA_graph
 
-![](Exercise4_files/figure-markdown_strict/unnamed-chunk-2-1.png)
+![](https://github.com/xiaohan-sun/Datamining/blob/main/exercise/images/ex4_Q1_1.png)
 
 Above are the PCA model, RMSE is 0.8706529 and f1Score is 0.9538267. We
 only utilize one chemical property instead of 11 properties.
@@ -80,7 +80,7 @@ We only utilize one class instead of 11 properties.
 Above are the Benchmark model, RMSE is 0.7346533 and f1Score is
 0.9896714. We utilize 11 chemical properties.
 
-### Which dimensionality reduction technique makes more sense to you for this data?
+#### Which dimensionality reduction technique makes more sense to you for this data?
 
 F1-score is a calculation result that comprehensively considers the
 precision and recall of the model. The larger the F1-score, the higher
@@ -90,7 +90,7 @@ the smaller the better. So that compared with PCA model and kmeans
 model, F1-score is higher and RMSE is lower in PCA model. I prefer PCA
 model.
 
-### Convince yourself (and me) that your chosen method is easily capable of distinguishing the reds from the whites, using only the “unsupervised” information contained in the data on chemical properties. Does your unsupervised technique also seem capable of distinguishing the higher from the lower quality wines?
+#### Convince yourself (and me) that your chosen method is easily capable of distinguishing the reds from the whites, using only the “unsupervised” information contained in the data on chemical properties. Does your unsupervised technique also seem capable of distinguishing the higher from the lower quality wines?
 
 PCA model is easily capable of distinguishing the reds from the whites.
 It seems not capable of distinguishing the higher from the lower quality
