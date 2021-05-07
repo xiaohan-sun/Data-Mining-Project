@@ -1,0 +1,404 @@
+---
+title: "Excercise 4"
+author: "Xiaohan Sun / Liyuan Zhang / Evelyn Cheng"
+date: "2021/5/6"
+output: word_document
+---
+
+## Problem 1: Clustering and PCA
+
+### Run both PCA and a clustering algorithm of your choice on the 11 chemical properties (or suitable transformations thereof) and summarize your results.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+options (warn = -1)
+library(factoextra)
+library(psych)
+library(nnet)
+library(ModelMetrics)
+wine = read.csv("~/Desktop/data/wine.csv")
+wine$color = as.numeric(wine$color=="red")
+test_features = wine[,1:11]
+```
+
+**PCA MODEL**
+
+```{r}
+PCA = prcomp(test_features, nfactors=3, scale = TRUE, scores=TRUE)
+print(summary(PCA))
+PCA_model = predict(PCA,test_features)
+PCA_model = as.data.frame(PCA_model)
+PCA_model$color = wine$color
+PCA_model$quality = wine$quality
+PCA_model1 <- lm(quality ~ PC1, data=PCA_model)
+PCA_model2 <- glm(color ~ PC1, family = binomial(), data=PCA_model)
+PCA1 = predict(PCA_model1)
+PCA2 = predict(PCA_model2,type = "response")
+print(rmse(PCA_model$quality,PCA1))
+print(f1Score(PCA_model$color,PCA2))
+PCA_graph = ggplot(data = PCA_model) + 
+  geom_point(aes(x = color, y = PC1))+
+  scale_x_continuous( breaks=seq(0,1,1))
+PCA_graph
+```
+
+Above are the PCA model, RMSE is 0.8706529 and f1Score is 0.9538267. We only utilize one chemical property instead of 11 properties.
+
+**KMEANS MODEL**
+
+```{r}
+set.seed(100)
+kfeatures = kmeans(test_features, centers = 2)
+wine$kcluster = kfeatures$cluster
+kmodel1 <- lm(quality ~ kcluster, data = wine)
+kmodel2 <- glm(color ~ kcluster, family = binomial(), data = wine)
+k1 = predict(kmodel1)
+k2 = predict(kmodel2,type = "response")
+print(rmse(wine$quality,k1))
+print(f1Score(wine$color,k2))
+```
+
+Above are the kmeans model, RMSE is 0.8731613 and f1Score is 0.6870887. We only utilize one class instead of 11 properties.
+
+**Benchmark MODEL**
+
+```{r}
+model1 <- lm(quality ~ .-color-quality, data=wine)
+model2 <- glm(color ~ .-color-quality, data=wine, family = binomial())
+wine1 = predict(model1)
+wine2 = predict(model2,type = "response")
+print(rmse(wine$quality, wine1))
+print(f1Score(wine$color, wine2))
+```
+
+Above are the Benchmark model, RMSE is 0.7346533 and f1Score is 0.9896714. We utilize 11 chemical properties.
+
+### Which dimensionality reduction technique makes more sense to you for this data?
+
+F1-score is a calculation result that comprehensively considers the precision and recall of the model. The larger the F1-score, the higher the quality of the model. PMSE represents the sample standard deviation of the difference between the predicted value and the observed value, the smaller the better. So that compared with PCA model and kmeans model, F1-score is higher and RMSE is lower in PCA model. I prefer PCA model.
+
+### Convince yourself (and me) that your chosen method is easily capable of distinguishing the reds from the whites, using only the "unsupervised" information contained in the data on chemical properties. Does your unsupervised technique also seem capable of distinguishing the higher from the lower quality wines?
+
+PCA model is easily capable of distinguishing the reds from the whites. It seems not capable of distinguishing the higher from the lower quality wines.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 2: Market segmentation
+
+In this report, we use K-means clustering to define "market segment".
+
+### Pre-process the data
+
+Before we do K-means clustering, we need to remove some labels that are meaningless to our analysis, and then center and scale the data. Here are these labels:
+
+|Labels|Definition|
+|:----:|:----:|
+|spam|i.e. unsolicited advertising|
+|adult|posts that are pornographic or otherwise explicit|
+|uncategorized|posts that don't fit at all into any of the listed interest categories|
+|chatter|sometimes has same definition as "uncategorized" label|
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(tidyverse)
+library(slam)
+library(proxy)
+library(cluster)
+library(foreach)
+
+social_marketing = read.csv("~/Desktop/data/social_marketing.csv", row.names=1)
+
+X1 = subset(social_marketing,select = -c(chatter,uncategorized,spam,adult))
+X1 = scale(X1, center=TRUE, scale=TRUE)
+mu = attr(X1,"scaled:center")
+sigma = attr(X1,"scaled:scale")
+```
+
+### Define "Market Segment"
+
+After cleaning the data, we can build a model to find interesting market segments that appear to stand out in their social-media audience. We have tried plenty of models to define the market segment, like hierarchical clustering, a principal component,etc. Finally, we decide to use k-means clustering to build the model.
+
+For choosing K, we use CH index to choose the best K. As the following graph shows, the K-means clustering with 4 clusters might be the "best" one to define market segment for NutrientH20.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+N = nrow(X1)
+k_grid = seq(2, 30, by=1)
+
+CH_grid = foreach(k = k_grid, .combine='c')%do%{
+  cluster_k = kmeans(X1, k, nstart=50)
+  W = cluster_k$tot.withinss
+  B = cluster_k$betweenss
+  CH = (B/W)*((N-k)/(k-1))
+  CH
+  }
+plot(k_grid, CH_grid, las=1)
+
+clust1 = kmeans(X1, 4, nstart=50)
+```
+
+Here are the 4 clusters:
+
+(1) cluster 1
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+c1 = sort(clust1$center[1,]*sigma + mu,decreasing = TRUE)
+c1 = c1[1:4]
+c1
+```
+
+(2) cluster 2
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+c2 = sort(clust1$center[2,]*sigma + mu,decreasing = TRUE)
+c2 = c2[1:4]
+c2
+```
+
+(3) cluster 3
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+c3 = sort(clust1$center[3,]*sigma + mu,decreasing = TRUE)
+c3 = c3[1:4]
+c3
+```
+
+(4) cluster 4
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+c4 = sort(clust1$center[4,]*sigma + mu,decreasing = TRUE)
+c4 = c4[1:4]
+c4
+```
+
+In conclusion, the four groups above represents some interesting market segments in their social-media audience, such as young people who love photo sharing, people who like travel and Social dynamics, people who pay more attention to keep fit, and people who are sports fans and also might have religious beliefs.
+
+The advertising firm could make advertisement based on the characteristic of these four groups.
+
+## Problem 3: Association rules for grocery purchases
+
+In order to find the association rules for the purchase of goods by grocery store customers. Firstly, organizing the data by using the data about grocery store purchases.
+
+```{r,include=FALSE}
+
+library(arules)
+library(arulesViz)
+library(igraph)
+library(tidyverse)
+
+groceries_raw = read.csv("~/Desktop/data/groceries.txt",header = FALSE)
+
+groceries_raw$buyer = seq.int(nrow(groceries_raw))
+
+groceries = cbind(groceries_raw[,5], stack(lapply(groceries_raw[,1:4], as.character)))[1:2]
+colnames(groceries) = c("buyer","item")
+groceries = groceries[order(groceries$buyer),]
+groceries = groceries[!(groceries$item==""),]
+row.names(groceries) = 1:nrow(groceries)
+groceries$buyer = factor(groceries$buyer)
+grocounts = groceries %>%
+  group_by(item) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+```
+
+After processing the data, the top 20 items of this data in the following figure. As you can see, whole milk is the most popular product.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+head(grocounts, 20) %>%
+  ggplot() +
+  geom_col(aes(x=reorder(item, count), y=count)) + 
+  coord_flip()+
+  labs(x="item",y="count")
+```
+
+After having a general understanding of the data, the association rules for grocery purchases are obtained through the calculation of the Apriori method.
+
+```{r, include=FALSE,message=FALSE,warning=FALSE}
+groceries = split(x=groceries$item, f=groceries$buyer)
+groceries = lapply(groceries, unique)
+grotrans = as(groceries, "transactions")
+
+
+goodrules = apriori(grotrans, 
+                    parameter=list(support=.01, confidence=.1, maxlen=2))
+inspect(goodrules)
+
+inspect(subset(goodrules, lift > 7))
+inspect(subset(goodrules, confidence > 0.6))
+inspect(subset(goodrules, lift > 10 & confidence > 0.05))
+```
+
+After having a general understanding of the data, the Apriori method is used to set the conditions of support=0.01, confidence=0.1 and maxlen=2 to calculate the association rules for grocery shopping. At the same time, the association rules are displayed in the form of a scatter plot.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+plot(goodrules, measure = c("support", "lift"), shading = "confidence")
+```
+
+Because the above-mentioned association rules are cumbersome and difficult to see clearly. In order to more easily understand the association rules of the grocery store products, we will reduce all the above-mentioned association rules to obtain a clearer subset of the association rules.
+
+By restricting the two conditions of confidence which is greater than 1% and support which is greater than 0.5%, 49 rules were selected from the association rules to form a subset.
+
+```{r, include=FALSE,message=FALSE,warning=FALSE}
+sub1 = subset(goodrules, subset=confidence > 0.01 & support > 0.005)
+```
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+plot(head(sub1, 100, by='lift'), method='graph')
+```
+
+## Problem 4: Author attribution
+
+The purpose of this exercise is to use the articles of 50 different authors in c50train to build a model, so as to be able to predict the identity of the author in the test data set through the articles.
+
+In order to study this issue, we first need to process the text. For the training set and test set, we use the sparse matrix method at the same time. By using a for loop on the data, the author name and text path of each file in the data set are obtained. Finally, the Corpus equation is used to form two different corpora. After obtaining the corpus, the training data and test data need to be processed separately. We set all letters to lowercase, delete numbers, delete punctuation marks and extra spaces.
+
+```{r data processing,echo=FALSE,message=FALSE,warning=FALSE}
+library(tm)
+library(tidyverse)
+library(plyr)
+library(randomForest)
+library("caret")
+require(stats)
+
+
+readerPlain = function(fname){
+  readPlain(elem=list(content=readLines(fname)), 
+            id=fname, language='en') }
+
+train_dirs = Sys.glob('~/Desktop/data/ReutersC50/C50train/*')
+file_list = NULL
+labels_train = NULL
+for(author in train_dirs) {
+  author_name = substring(author, first=52)
+  files_to_add = Sys.glob(paste0(author, '/*.txt'))
+  file_list = append(file_list, files_to_add)
+  labels_train = append(labels_train,rep(author_name,length(files_to_add)))
+}
+
+
+train_auth = lapply(file_list, readerPlain) 
+names(train_auth) = file_list
+names(train_auth) = sub('.txt', '', names(train_auth))
+
+train_corpus = Corpus(VectorSource(train_auth))
+
+train_corpus = train_corpus %>% 
+  tm_map(., content_transformer(tolower)) %>% 
+  tm_map(., content_transformer(removeNumbers)) %>% 
+  tm_map(., content_transformer(removePunctuation)) %>% 
+  tm_map(., content_transformer(stripWhitespace)) %>% 
+  tm_map(., content_transformer(removeWords), stopwords("SMART"))
+
+DTM_train = DocumentTermMatrix(train_corpus)
+DTM_train = removeSparseTerms(DTM_train, .95)
+
+
+X_train = as.matrix(DTM_train)
+
+### test
+author_dirs  = Sys.glob('~/Desktop/data/ReutersC50/C50test/*')
+
+file_list = NULL
+test_labels = NULL
+author_names = NULL
+
+for(author in author_dirs) {
+  author_name = substring(author, first=51)
+  author_names = append(author_names, author_name)
+  files_to_add = Sys.glob(paste0(author, '/*.txt'))
+  file_list = append(file_list, files_to_add)
+  test_labels = append(test_labels, rep(author_name, length(files_to_add)))
+}
+
+test_auth = lapply(file_list, readerPlain) 
+names(test_auth) = file_list
+names(test_auth) = sub('.txt', '', names(test_auth))
+
+test_corpus = Corpus(VectorSource(test_auth))
+
+
+test_corpus = test_corpus%>% 
+  tm_map(., content_transformer(tolower)) %>%
+  tm_map(., content_transformer(removeNumbers)) %>%
+  tm_map(., content_transformer(removePunctuation)) %>% 
+  tm_map(., content_transformer(stripWhitespace)) %>%
+  tm_map(., content_transformer(removeWords), stopwords("SMART"))
+
+DTM_test = DocumentTermMatrix(test_corpus,list(dictionary=colnames(DTM_train)))
+
+X_test = as.matrix(DTM_test)
+
+```
+
+After the data processing is completed, we decided to use the two methods of Naive Bayes and Random Forest to complete the model establishment, and use the test data to predict its accuracy, compare the two models, and select a better method.
+
+```{r Naive Bayes,echo=FALSE,message=FALSE,warning=FALSE}
+
+smooth_count = 1/nrow(X_train)
+w = rowsum(X_train+smooth_count,labels_train)
+w = w/sum(w)
+w = log(w)
+
+predict = NULL
+for (i in 1:nrow(X_test)) {
+  # get maximum Naive Bayes log probabilities
+  max = -(Inf)
+  author = NULL
+  for (j in 1:nrow(w)) {
+    result = sum(w[j,]*X_test[i,])
+    if(result > max) {
+      max = result
+      author = rownames(w)[j]
+    }
+  }
+  predict = append(predict, author)
+}
+predict_results = table(test_labels,predict)
+correct = NULL
+
+for (i in 1:nrow(predict_results)) {
+  correct = append(correct, predict_results[i])
+}
+
+author.predict.correct = data.frame(author_names, correct)
+author.predict.correct <- author.predict.correct[order(-correct),] 
+author.predict.correct$per.correct <- author.predict.correct$correct/50
+```
+
+```{r bayes result}
+author.predict.correct
+
+sum(author.predict.correct$correct)/nrow(X_test)
+
+```
+
+When we use the Naive Bayes model to make predictions, the accuracy obtained is around 3%.
+
+In order to be able to get a better prediction model, we also used the random forest method to predict the model.
+
+```{r random forest,echo=FALSE,message=FALSE,warning=FALSE}
+
+set.seed(1)
+
+X_train = as.data.frame(as.matrix(DTM_train))
+X_test = as.data.frame(as.matrix(DTM_test))
+common_cols = intersect(names(X_train), names(X_test))
+
+X_train_2 =X_train[,c(common_cols)]
+
+
+rfmodel <- randomForest(x=X_train_2,y=factor(labels_train),ntree=100)
+rf.pred = predict(rfmodel,newdata=X_test)
+conf_matrix = table(rf.pred,test_labels)
+
+
+
+count = 0
+for(i in 1:dim(conf_matrix)[1]){
+  count = count + conf_matrix[i,i]
+}
+accuracy=count/2500
+```
+```{r rd accuracy}
+accuracy
+```
+The accuracy of the random forest is about 60%, which is much better than Naive bayes method.
