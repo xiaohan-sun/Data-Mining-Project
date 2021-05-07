@@ -39,6 +39,7 @@ are these labels:
 </tbody>
 </table>
 
+
 ### Define “Market Segment”
 
 After cleaning the data, we can build a model to find interesting market
@@ -51,7 +52,7 @@ For choosing K, we use CH index to choose the best K. As the following
 graph shows, the K-means clustering with 4 clusters might be the “best”
 one to define market segment for NutrientH20.
 
-![](Ex4_files/figure-markdown_strict/unnamed-chunk-2-1.png)
+![](https://github.com/xiaohan-sun/Datamining/blob/main/exercise/images/ex4_Q2.png)
 
 Here are the 4 clusters:
 
