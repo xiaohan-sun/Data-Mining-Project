@@ -148,36 +148,6 @@ methods of Naive Bayes and Random Forest to complete the model
 establishment, and use the test data to predict its accuracy, compare
 the two models, and select a better method.
 
-    smooth_count = 1/nrow(X_train)
-    w = rowsum(X_train+smooth_count,labels_train)
-    w = w/sum(w)
-    w = log(w)
-
-    predict = NULL
-    for (i in 1:nrow(X_test)) {
-      # get maximum Naive Bayes log probabilities
-      max = -(Inf)
-      author = NULL
-      for (j in 1:nrow(w)) {
-        result = sum(w[j,]*X_test[i,])
-        if(result > max) {
-          max = result
-          author = rownames(w)[j]
-        }
-      }
-      predict = append(predict, author)
-    }
-    predict_results = table(test_labels,predict)
-    correct = NULL
-
-    for (i in 1:nrow(predict_results)) {
-      correct = append(correct, predict_results[i])
-    }
-
-    author.predict.correct = data.frame(author_names, correct)
-    author.predict.correct <- author.predict.correct[order(-correct),] 
-    author.predict.correct$per.correct <- author.predict.correct$correct/50
-
     author.predict.correct
 
     ##         author_names correct per.correct
@@ -237,32 +207,14 @@ the two models, and select a better method.
     ## [1] 0.024
 
 When we use the Naive Bayes model to make predictions, the accuracy
-obtained is
+obtained is around 3%.
 
 In order to be able to get a better prediction model, we also used the
 random forest method to predict the model.
 
-    set.seed(1)
-
-    X_train = as.data.frame(as.matrix(DTM_train))
-    X_test = as.data.frame(as.matrix(DTM_test))
-    common_cols = intersect(names(X_train), names(X_test))
-
-    X_train_2 =X_train[,c(common_cols)]
-
-
-    rfmodel <- randomForest(x=X_train_2,y=factor(labels_train),ntree=100)
-    rf.pred = predict(rfmodel,newdata=X_test)
-    conf_matrix = table(rf.pred,test_labels)
-
-
-
-    count = 0
-    for(i in 1:dim(conf_matrix)[1]){
-      count = count + conf_matrix[i,i]
-    }
-    accuracy=count/2500
-
     accuracy
 
     ## [1] 0.5712
+
+The accuracy of the random forest is about 60%, which is much better
+than Naive bayes method.
