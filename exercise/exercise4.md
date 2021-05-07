@@ -1,3 +1,102 @@
+## Problem 1: Clustering and PCA
+
+### Run both PCA and a clustering algorithm of your choice on the 11 chemical properties (or suitable transformations thereof) and summarize your results.
+
+**PCA MODEL**
+
+    PCA = prcomp(test_features, nfactors=3, scale = TRUE, scores=TRUE)
+    print(summary(PCA))
+
+    ## Importance of components:
+    ##                           PC1    PC2    PC3     PC4     PC5     PC6     PC7
+    ## Standard deviation     1.7407 1.5792 1.2475 0.98517 0.84845 0.77930 0.72330
+    ## Proportion of Variance 0.2754 0.2267 0.1415 0.08823 0.06544 0.05521 0.04756
+    ## Cumulative Proportion  0.2754 0.5021 0.6436 0.73187 0.79732 0.85253 0.90009
+    ##                            PC8     PC9   PC10    PC11
+    ## Standard deviation     0.70817 0.58054 0.4772 0.18119
+    ## Proportion of Variance 0.04559 0.03064 0.0207 0.00298
+    ## Cumulative Proportion  0.94568 0.97632 0.9970 1.00000
+
+    PCA_model = predict(PCA,test_features)
+    PCA_model = as.data.frame(PCA_model)
+    PCA_model$color = wine$color
+    PCA_model$quality = wine$quality
+    PCA_model1 <- lm(quality ~ PC1, data=PCA_model)
+    PCA_model2 <- glm(color ~ PC1, family = binomial(), data=PCA_model)
+    PCA1 = predict(PCA_model1)
+    PCA2 = predict(PCA_model2,type = "response")
+    print(rmse(PCA_model$quality,PCA1))
+
+    ## [1] 0.8706529
+
+    print(f1Score(PCA_model$color,PCA2))
+
+    ## [1] 0.9538267
+
+    PCA_graph = ggplot(data = PCA_model) + 
+      geom_point(aes(x = color, y = PC1))+
+      scale_x_continuous( breaks=seq(0,1,1))
+    PCA_graph
+
+![](Exercise4_files/figure-markdown_strict/unnamed-chunk-2-1.png)
+
+Above are the PCA model, RMSE is 0.8706529 and f1Score is 0.9538267. We
+only utilize one chemical property instead of 11 properties.
+
+**KMEANS MODEL**
+
+    set.seed(100)
+    kfeatures = kmeans(test_features, centers = 2)
+    wine$kcluster = kfeatures$cluster
+    kmodel1 <- lm(quality ~ kcluster, data = wine)
+    kmodel2 <- glm(color ~ kcluster, family = binomial(), data = wine)
+    k1 = predict(kmodel1)
+    k2 = predict(kmodel2,type = "response")
+    print(rmse(wine$quality,k1))
+
+    ## [1] 0.8731613
+
+    print(f1Score(wine$color,k2))
+
+    ## [1] 0.6870887
+
+Above are the kmeans model, RMSE is 0.8731613 and f1Score is 0.6870887.
+We only utilize one class instead of 11 properties.
+
+**Benchmark MODEL**
+
+    model1 <- lm(quality ~ .-color-quality, data=wine)
+    model2 <- glm(color ~ .-color-quality, data=wine, family = binomial())
+    wine1 = predict(model1)
+    wine2 = predict(model2,type = "response")
+    print(rmse(wine$quality, wine1))
+
+    ## [1] 0.7330134
+
+    print(f1Score(wine$color, wine2))
+
+    ## [1] 0.989355
+
+Above are the Benchmark model, RMSE is 0.7346533 and f1Score is
+0.9896714. We utilize 11 chemical properties.
+
+### Which dimensionality reduction technique makes more sense to you for this data?
+
+F1-score is a calculation result that comprehensively considers the
+precision and recall of the model. The larger the F1-score, the higher
+the quality of the model. PMSE represents the sample standard deviation
+of the difference between the predicted value and the observed value,
+the smaller the better. So that compared with PCA model and kmeans
+model, F1-score is higher and RMSE is lower in PCA model. I prefer PCA
+model.
+
+### Convince yourself (and me) that your chosen method is easily capable of distinguishing the reds from the whites, using only the “unsupervised” information contained in the data on chemical properties. Does your unsupervised technique also seem capable of distinguishing the higher from the lower quality wines?
+
+PCA model is easily capable of distinguishing the reds from the whites.
+It seems not capable of distinguishing the higher from the lower quality
+wines.
+
+
 ## Problem 2: Market segmentation
 
 In this report, we use K-means clustering to define “market segment”.
