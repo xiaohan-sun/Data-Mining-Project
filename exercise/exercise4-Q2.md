@@ -92,3 +92,177 @@ might have religious beliefs.
 
 The advertising firm could make advertisement based on the
 characteristic of these four groups.
+
+## Problem 3: Association rules for grocery purchases
+
+In order to find the association rules for the purchase of goods by
+grocery store customers. Firstly, organizing the data by using the data
+about grocery store purchases.
+
+After processing the data, the top 20 items of this data in the
+following figure. As you can see, whole milk is the most popular
+product.
+
+![](https://github.com/xiaohan-sun/Datamining/blob/main/exercise/images/ex4_Q3_1.png)
+
+After having a general understanding of the data, the association rules
+for grocery purchases are obtained through the calculation of the
+Apriori method.
+
+After having a general understanding of the data, the Apriori method is
+used to set the conditions of support=0.01, confidence=0.1 and maxlen=2
+to calculate the association rules for grocery shopping. At the same
+time, the association rules are displayed in the form of a scatter plot.
+
+![](https://github.com/xiaohan-sun/Datamining/blob/main/exercise/images/ex4_Q3_2.png)
+
+Because the above-mentioned association rules are cumbersome and
+difficult to see clearly. In order to more easily understand the
+association rules of the grocery store products, we will reduce all the
+above-mentioned association rules to obtain a clearer subset of the
+association rules.
+
+By restricting the two conditions of confidence which is greater than 1%
+and support which is greater than 0.5%, 49 rules were selected from the
+association rules to form a subset.
+
+![](https://github.com/xiaohan-sun/Datamining/blob/main/exercise/images/ex4_Q3_3.png)
+
+## Problem 4: Author attribution
+
+The purpose of this exercise is to use the articles of 50 different
+authors in c50train to build a model, so as to be able to predict the
+identity of the author in the test data set through the articles.
+
+In order to study this issue, we first need to process the text. For the
+training set and test set, we use the sparse matrix method at the same
+time. By using a for loop on the data, the author name and text path of
+each file in the data set are obtained. Finally, the Corpus equation is
+used to form two different corpora. After obtaining the corpus, the
+training data and test data need to be processed separately. We set all
+letters to lowercase, delete numbers, delete punctuation marks and extra
+spaces.
+
+After the data processing is completed, we decided to use the two
+methods of Naive Bayes and Random Forest to complete the model
+establishment, and use the test data to predict its accuracy, compare
+the two models, and select a better method.
+
+    smooth_count = 1/nrow(X_train)
+    w = rowsum(X_train+smooth_count,labels_train)
+    w = w/sum(w)
+    w = log(w)
+
+    predict = NULL
+    for (i in 1:nrow(X_test)) {
+      # get maximum Naive Bayes log probabilities
+      max = -(Inf)
+      author = NULL
+      for (j in 1:nrow(w)) {
+        result = sum(w[j,]*X_test[i,])
+        if(result > max) {
+          max = result
+          author = rownames(w)[j]
+        }
+      }
+      predict = append(predict, author)
+    }
+    predict_results = table(test_labels,predict)
+    correct = NULL
+
+    for (i in 1:nrow(predict_results)) {
+      correct = append(correct, predict_results[i])
+    }
+
+    author.predict.correct = data.frame(author_names, correct)
+    author.predict.correct <- author.predict.correct[order(-correct),] 
+    author.predict.correct$per.correct <- author.predict.correct$correct/50
+
+    author.predict.correct
+
+    ##         author_names correct per.correct
+    ## 1      AaronPressman      31        0.62
+    ## 41      RogerFillion      10        0.20
+    ## 32        MartinWolk       3        0.06
+    ## 47    TheresePoletti       3        0.06
+    ## 49        ToddNissen       3        0.06
+    ## 10       EricAuchard       2        0.04
+    ## 42       SamuelPerry       2        0.04
+    ## 3     AlexanderSmith       1        0.02
+    ## 6        BradDorfman       1        0.02
+    ## 8        DavidLawder       1        0.02
+    ## 11    FumikoFujisaki       1        0.02
+    ## 26 KouroshKarimkhany       1        0.02
+    ## 34     MichaelConnor       1        0.02
+    ## 2         AlanCrosby       0        0.00
+    ## 4    BenjaminKangLim       0        0.00
+    ## 5      BernardHickey       0        0.00
+    ## 7   DarrenSchuettler       0        0.00
+    ## 9      EdnaFernandes       0        0.00
+    ## 12    GrahamEarnshaw       0        0.00
+    ## 13  HeatherScoffield       0        0.00
+    ## 14        JanLopatka       0        0.00
+    ## 15     JaneMacartney       0        0.00
+    ## 16      JimGilchrist       0        0.00
+    ## 17    JoWinterbottom       0        0.00
+    ## 18          JoeOrtiz       0        0.00
+    ## 19      JohnMastrini       0        0.00
+    ## 20      JonathanBirt       0        0.00
+    ## 21       KarlPenhaul       0        0.00
+    ## 22         KeithWeir       0        0.00
+    ## 23    KevinDrawbaugh       0        0.00
+    ## 24     KevinMorrison       0        0.00
+    ## 25     KirstinRidley       0        0.00
+    ## 27         LydiaZajc       0        0.00
+    ## 28    LynneO'Donnell       0        0.00
+    ## 29   LynnleyBrowning       0        0.00
+    ## 30   MarcelMichelson       0        0.00
+    ## 31      MarkBendeich       0        0.00
+    ## 33      MatthewBunce       0        0.00
+    ## 35        MureDickie       0        0.00
+    ## 36         NickLouth       0        0.00
+    ## 37   PatriciaCommins       0        0.00
+    ## 38     PeterHumphrey       0        0.00
+    ## 39        PierreTran       0        0.00
+    ## 40        RobinSidel       0        0.00
+    ## 43      SarahDavison       0        0.00
+    ## 44       ScottHillis       0        0.00
+    ## 45       SimonCowell       0        0.00
+    ## 46          TanEeLyn       0        0.00
+    ## 48        TimFarrand       0        0.00
+    ## 50      WilliamKazer       0        0.00
+
+    sum(author.predict.correct$correct)/nrow(X_test)
+
+    ## [1] 0.024
+
+When we use the Naive Bayes model to make predictions, the accuracy
+obtained is
+
+In order to be able to get a better prediction model, we also used the
+random forest method to predict the model.
+
+    set.seed(1)
+
+    X_train = as.data.frame(as.matrix(DTM_train))
+    X_test = as.data.frame(as.matrix(DTM_test))
+    common_cols = intersect(names(X_train), names(X_test))
+
+    X_train_2 =X_train[,c(common_cols)]
+
+
+    rfmodel <- randomForest(x=X_train_2,y=factor(labels_train),ntree=100)
+    rf.pred = predict(rfmodel,newdata=X_test)
+    conf_matrix = table(rf.pred,test_labels)
+
+
+
+    count = 0
+    for(i in 1:dim(conf_matrix)[1]){
+      count = count + conf_matrix[i,i]
+    }
+    accuracy=count/2500
+
+    accuracy
+
+    ## [1] 0.5712
