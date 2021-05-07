@@ -55,28 +55,28 @@ one to define market segment for NutrientH20.
 
 Here are the 4 clusters:
 
-1.  cluster 1
+Cluster 1
 
 <!-- -->
 
     ## health_nutrition          cooking    photo_sharing personal_fitness 
     ##         7.635319         6.332376         4.590093         4.147164
 
-1.  cluster 2
+Cluster 2
 
 <!-- -->
 
     ## sports_fandom      religion          food     parenting 
     ##      5.877039      5.262233      4.534504      4.027604
 
-1.  cluster 3
+Cluster 3
 
 <!-- -->
 
     ##      politics        travel          news photo_sharing 
     ##      8.939860      5.618182      5.300699      2.531469
 
-1.  cluster 4
+Cluster 4
 
 <!-- -->
 
