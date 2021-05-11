@@ -4,7 +4,7 @@ We have filtered out all the missing value and unknown value in state/ age_group
 
 * Cleaned Data [here](https://drive.google.com/file/d/158sOsgAKiuG0DVC-0CrCDPE8I9qftumi/view?usp=sharing)
 
-* Sourse: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
+* Source: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
 
 # Codebook
 
@@ -25,4 +25,4 @@ We have filtered out all the missing value and unknown value in state/ age_group
 * **icu_yn:** Was the patient admitted to an intensive care unit (ICU)? (Yes, No, Unknown, Missing)
 * **res_state:** State of residence.
 
-Sourse: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
+Source: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
