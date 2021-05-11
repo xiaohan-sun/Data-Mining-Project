@@ -2,9 +2,10 @@
 
 We have filtered out all the missing value and unknown value in state/ age_group/ sex/ race/ exposure_yn/ symptom_status/ hosp_yn/ icu_yn/ death_yn columns.
 
-Cleaned Data [here](https://drive.google.com/file/d/158sOsgAKiuG0DVC-0CrCDPE8I9qftumi/view?usp=sharing)
+* Cleaned Data [here](https://drive.google.com/file/d/158sOsgAKiuG0DVC-0CrCDPE8I9qftumi/view?usp=sharing)
 
-Sourse: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
+* Sourse: [CDC](https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data-with-Ge/ynhu-f2s2)
+
 # Codebook
 
 * **case_month:** The earlier of month the Clinical Date (date related to the illness or specimen collection) or the Date Received by CDC.
