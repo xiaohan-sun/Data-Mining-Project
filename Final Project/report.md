@@ -1,3 +1,8 @@
+# ECO 395 Project: COVID-19 Death Rate Prediction
+
+### Xiaohan Sun/ Liyuan Zhang/ Evelyn Cheng
+
+
 ### Abstract
 
 The pandemic of COVID-19 now is becoming the world’s greatest threat,
